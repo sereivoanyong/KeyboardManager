@@ -66,9 +66,7 @@ final public class KeyboardManager: NSObject {
     let oldKeyboardUserInfo = keyboardUserInfo
     keyboardUserInfo = KeyboardUserInfo(notification: notification)
     if keyboardUserInfo?.frameEnd != oldKeyboardUserInfo?.frameEnd {
-      if isKeyboardShown {
-        layout()
-      }
+      layout()
     }
   }
 
@@ -138,14 +136,11 @@ final public class KeyboardManager: NSObject {
     if let textField = textInputView as? UITextField, (textField.isAlertViewTextField || textField.isSearchBarTextField) {
       return false
     }
-    guard let viewController = textInputView.owningViewController else {
+    let inputAccessoryViewSetter = #selector(setter: UITextField.inputAccessoryView)
+    guard textInputView.responds(to: inputAccessoryViewSetter), let viewController = textInputView.owningViewController else {
       return false
     }
     let siblings = viewController.view.findTextInputViewsRecursively()
-    let inputAccessoryViewSetter = #selector(setter: UITextField.inputAccessoryView)
-    guard textInputView.responds(to: inputAccessoryViewSetter) else {
-      return false
-    }
     let toolbar = textInputView.keyboardToolbar
     // Configure title
     do {
@@ -155,14 +150,16 @@ final public class KeyboardManager: NSObject {
       }
     }
     // Configure done/next/previous button items
-    toolbar.doneButtonItem.target = self
-    toolbar.doneButtonItem.action = #selector(done(_:))
-    toolbar.nextButtonItem.target = self
-    toolbar.nextButtonItem.action = #selector(goToNext(_:))
-    toolbar.nextButtonItem.isEnabled = siblings.last !== textInputView
-    toolbar.previousButtonItem.target = self
-    toolbar.previousButtonItem.action = #selector(goToPrevious(_:))
-    toolbar.previousButtonItem.isEnabled = siblings.first !== textInputView
+    do {
+      toolbar.doneButtonItem.target = self
+      toolbar.doneButtonItem.action = #selector(done(_:))
+      toolbar.nextButtonItem.target = self
+      toolbar.nextButtonItem.action = #selector(goToNext(_:))
+      toolbar.nextButtonItem.isEnabled = siblings.last !== textInputView
+      toolbar.previousButtonItem.target = self
+      toolbar.previousButtonItem.action = #selector(goToPrevious(_:))
+      toolbar.previousButtonItem.isEnabled = siblings.first !== textInputView
+    }
     // Configure keyboard appearance
     if let keyboardAppearance = textInputView.keyboardAppearance {
       if keyboardAppearance == .dark {
