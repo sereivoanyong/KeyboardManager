@@ -25,6 +25,8 @@ final public class KeyboardManager: NSObject {
 
   public var toolbarUsesTextInputViewTintColor: Bool = true
 
+  public var playsInputClickOnToolbarActionsTriggered: Bool = true
+
   private weak var scrollView: UIScrollView?
 
   private var oldScrollViewContentInsetBottom: CGFloat?
@@ -178,13 +180,17 @@ final public class KeyboardManager: NSObject {
   }
 
   @objc private func done(_ sender: UIBarButtonItem) {
-    UIDevice.current.playInputClick()
+    if playsInputClickOnToolbarActionsTriggered {
+      UIDevice.current.playInputClick()
+    }
 
     textInputView?.resignFirstResponder()
   }
 
   @objc private func goToNext(_ sender: UIBarButtonItem) {
-    UIDevice.current.playInputClick()
+    if playsInputClickOnToolbarActionsTriggered {
+      UIDevice.current.playInputClick()
+    }
 
     guard let textInputView = textInputView, let viewController = textInputView.owningViewController else {
       return
@@ -203,7 +209,9 @@ final public class KeyboardManager: NSObject {
   }
 
   @objc private func goToPrevious(_ sender: UIBarButtonItem) {
-    UIDevice.current.playInputClick()
+    if playsInputClickOnToolbarActionsTriggered {
+      UIDevice.current.playInputClick()
+    }
 
     guard let textInputView = textInputView, let viewController = textInputView.owningViewController else {
       return
