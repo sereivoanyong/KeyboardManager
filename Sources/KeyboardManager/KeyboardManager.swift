@@ -219,17 +219,16 @@ final public class KeyboardManager: NSObject {
   // MARK: Layout
 
   func layout() {
-    guard let keyboardUserInfo = keyboardUserInfo,
-          let textInputView = textInputView,
-          let window = textInputView.window
+    guard
+      let keyboardUserInfo = keyboardUserInfo,
+      let textInputView = textInputView,
+      let scrollView = textInputView.scrollViewForAdjustments(),
+      let window = textInputView.window
     else {
       return
     }
 
-    scrollView = textInputView.scrollViewForAdjustments()
-    guard let scrollView = scrollView else {
-      return
-    }
+    self.scrollView = scrollView
     scrollView.isBeingAdjustedForKeyboard = true
 
     let windowKeyboardFrame = keyboardUserInfo.frameEnd.intersection(window.frame)
