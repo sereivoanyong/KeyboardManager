@@ -23,6 +23,8 @@ final public class KeyboardManager: NSObject {
 
   public var automaticallyAddsToolbar: Bool = true
 
+  public var toolbarUsesTextInputViewTintColor: Bool = true
+
   private weak var scrollView: UIScrollView?
 
   private var oldScrollViewContentInsetBottom: CGFloat?
@@ -167,6 +169,9 @@ final public class KeyboardManager: NSObject {
       } else {
         toolbar.barStyle = .default
       }
+    }
+    if toolbarUsesTextInputViewTintColor {
+      toolbar.tintColor = toolbarUsesTextInputViewTintColor ? textInputView.tintColor : nil
     }
     textInputView.perform(inputAccessoryViewSetter, with: toolbar)
     return true
