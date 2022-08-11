@@ -148,9 +148,11 @@ final public class KeyboardManager: NSObject {
     let toolbar = textInputView.keyboardToolbar
     // Configure title
     do {
-      let placeholderGetter = #selector(getter: UITextField.placeholder)
-      if textInputView.responds(to: placeholderGetter) {
-        toolbar.title = textInputView.perform(placeholderGetter)?.takeUnretainedValue() as? String
+      if toolbar.title?.isEmpty ?? true {
+        let placeholderGetter = #selector(getter: UITextField.placeholder)
+        if textInputView.responds(to: placeholderGetter) {
+          toolbar.title = textInputView.perform(placeholderGetter)?.takeUnretainedValue() as? String
+        }
       }
     }
     // Configure done/next/previous button items
