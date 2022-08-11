@@ -11,7 +11,7 @@ private var keyboardToolbarKey: Void?
 
 extension UITextInputTraits where Self: UIView {
 
-  var keyboardToolbar: KeyboardToolbar {
+  public var keyboardToolbar: KeyboardToolbar {
     if let toolbar = inputAccessoryView as? KeyboardToolbar ?? objc_getAssociatedObject(self, &keyboardToolbarKey) as? KeyboardToolbar {
       return toolbar
     }

@@ -6,22 +6,22 @@
 
 import UIKit
 
-final class KeyboardToolbar: UIToolbar {
+final public class KeyboardToolbar: UIToolbar {
 
-  let titleLabel: UILabel
-  let titleButtonItem: UIBarButtonItem
+  public let titleLabel: UILabel
+  public let titleButtonItem: UIBarButtonItem
 
-  lazy private(set) var doneButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: nil)
+  lazy public private(set) var doneButtonItem: UIBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: nil)
 
-  lazy private(set) var nextButtonItem: UIBarButtonItem = UIBarButtonItem(image: keyboardDownImage, style: .plain, target: nil, action: nil)
-  lazy private(set) var previousButtonItem: UIBarButtonItem = UIBarButtonItem(image: keyboardUpImage, style: .plain, target: nil, action: nil)
+  lazy public private(set) var nextButtonItem: UIBarButtonItem = UIBarButtonItem(image: keyboardDownImage, style: .plain, target: nil, action: nil)
+  lazy public private(set) var previousButtonItem: UIBarButtonItem = UIBarButtonItem(image: keyboardUpImage, style: .plain, target: nil, action: nil)
 
-  var title: String? {
+  public var title: String? {
     get { return titleLabel.text }
     set { titleLabel.text = newValue }
   }
 
-  override init(frame: CGRect) {
+  public override init(frame: CGRect) {
     titleLabel = UILabel()
     titleLabel.font = .systemFont(ofSize: 13)
     if #available(iOS 13.0, *) {
@@ -42,7 +42,7 @@ final class KeyboardToolbar: UIToolbar {
   }
 
   @available(*, unavailable)
-  required init?(coder: NSCoder) {
+  public required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 }
