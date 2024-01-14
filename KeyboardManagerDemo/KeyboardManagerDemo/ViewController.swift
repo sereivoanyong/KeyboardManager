@@ -21,7 +21,7 @@ final class ViewController: UIViewController {
   override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
 
-    if let button = button {
+    if let button {
       scrollView.contentInset.bottom = button.frame.height + 16 * 2
     }
   }

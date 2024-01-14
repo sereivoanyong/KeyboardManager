@@ -83,16 +83,16 @@ final public class KeyboardManager: NSObject {
 
     keyboardUserInfo = KeyboardUserInfo(notification: notification)
 
-    if let scrollView = scrollView {
+    if let scrollView {
       let restore: () -> Void = { [unowned self] in
-        if let oldScrollViewContentInsetBottom = oldScrollViewContentInsetBottom {
+        if let oldScrollViewContentInsetBottom {
           scrollView.contentInset.bottom = oldScrollViewContentInsetBottom
         }
-        if let oldScrollViewScrollIndicatorInsetBottom = oldScrollViewScrollIndicatorInsetBottom {
+        if let oldScrollViewScrollIndicatorInsetBottom {
           scrollView.scrollIndicatorInsets.bottom = oldScrollViewScrollIndicatorInsetBottom
         }
       }
-      if let keyboardUserInfo = keyboardUserInfo {
+      if let keyboardUserInfo {
         keyboardUserInfo.animate(animations: restore)
       } else {
         restore()
@@ -113,8 +113,8 @@ final public class KeyboardManager: NSObject {
 
   @objc private func textDidBeginEditing(_ notification: Notification) {
     textInputView = notification.object as? TextInputView
-    if let textInputView = textInputView {
-      if let overrideKeyboardAppearance = overrideKeyboardAppearance {
+    if let textInputView {
+      if let overrideKeyboardAppearance {
         if textInputView.responds(to: #selector(setter: UITextInputTraits.keyboardAppearance)) {
           textInputView.perform(#selector(setter: UITextInputTraits.keyboardAppearance), with: overrideKeyboardAppearance)
         }

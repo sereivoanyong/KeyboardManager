@@ -9,7 +9,7 @@ import UIKit
 extension UIView {
 
   final func superview<T: UIView>(of type: T.Type) -> T? {
-    if let superview = superview {
+    if let superview {
       if let superview = superview as? T {
         return superview
       }
@@ -20,7 +20,7 @@ extension UIView {
 
   /// The view controller that owns this view.
   final var owningViewController: UIViewController? {
-    if let next = next {
+    if let next {
       if let viewController = next as? UIViewController {
         return viewController
       }

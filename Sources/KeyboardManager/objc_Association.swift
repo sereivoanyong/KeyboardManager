@@ -28,7 +28,7 @@ func objc_getAssociatedValue<T>(_ object: Any, _ key: UnsafeRawPointer) -> T? {
 
 @usableFromInline
 func objc_setAssociatedValue<T>(_ object: Any, _ key: UnsafeRawPointer, _ value: T?) {
-  if let value = value {
+  if let value {
     if let box = objc_getAssociatedBox(object, key) as Box<T>? {
       box.value = value
     } else {
