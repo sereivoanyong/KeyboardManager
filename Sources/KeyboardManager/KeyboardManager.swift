@@ -27,6 +27,8 @@ final public class KeyboardManager: NSObject {
 
   public var playsInputClickOnToolbarActionsTriggered: Bool = true
 
+  public var viewControllerClassesToDisableToolbar: [UIViewController.Type] = []
+
   private weak var scrollView: UIScrollView?
 
   private var oldScrollViewContentInsetBottom: CGFloat?
@@ -121,9 +123,8 @@ final public class KeyboardManager: NSObject {
         textInputView.reloadInputViews()
       }
 
-      if automaticallyAddsToolbar && textInputView.inputAccessoryView == nil {
-        configureToolbar(for: textInputView)
-      }
+      reloadToolbar(for: textInputView)
+
       textInputView.window?.addGestureRecognizer(gestureRecognizerToResignFirstResponder)
     }
   }
@@ -135,8 +136,29 @@ final public class KeyboardManager: NSObject {
 
   // MARK: Toolbar
 
+  func reloadToolbar(for textInputView: TextInputView) {
+    let addsToolbar: Bool
+    if automaticallyAddsToolbar {
+      if let viewController = textInputView.owningViewController {
+        addsToolbar = !viewControllerClassesToDisableToolbar.contains(where: viewController.isKind(of:))
+      } else {
+        addsToolbar = true
+      }
+    } else {
+      addsToolbar = false
+    }
+    if addsToolbar {
+      addToolbarIfNeeded(for: textInputView)
+    } else {
+      removeToolbars(in: textInputView.owningViewController)
+    }
+  }
+
   @discardableResult
-  func configureToolbar(for textInputView: TextInputView) -> Bool {
+  func addToolbarIfNeeded(for textInputView: TextInputView) -> Bool {
+    guard textInputView.inputAccessoryView == nil else {
+      return false
+    }
     if let textField = textInputView as? UITextField, (textField.isAlertViewTextField || textField.isSearchBarTextField) {
       return false
     }
@@ -179,6 +201,17 @@ final public class KeyboardManager: NSObject {
     }
     textInputView.perform(inputAccessoryViewSetter, with: toolbar)
     return true
+  }
+
+  func removeToolbars(in viewController: UIViewController?) {
+    guard let viewController else { return }
+    let inputAccessoryViewSetter = #selector(setter: UITextField.inputAccessoryView)
+    let siblings = viewController.view.findTextInputViewsRecursively()
+    for sibling in siblings {
+      guard sibling.responds(to: inputAccessoryViewSetter) && sibling.inputAccessoryView is KeyboardToolbar else { continue }
+      sibling.perform(inputAccessoryViewSetter, with: nil)
+      sibling.reloadInputViews()
+    }
   }
 
   @objc private func done(_ sender: UIBarButtonItem) {
