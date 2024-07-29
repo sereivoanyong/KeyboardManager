@@ -6,7 +6,33 @@
 
 import UIKit
 
+enum SelectionInfo {
+
+  case collection(UICollectionView, IndexPath)
+
+  case table(UITableView, IndexPath)
+}
+
 extension UIView {
+
+  func selectionInfo() -> SelectionInfo? {
+    switch self {
+    case let cell as UICollectionViewCell:
+      if let collectionView = cell.superview(of: UICollectionView.self), let indexPath = collectionView.indexPath(for: cell) {
+        return .collection(collectionView, indexPath)
+      }
+    case let cell as UITableViewCell:
+      if let tableView = cell.superview(of: UITableView.self), let indexPath = tableView.indexPath(for: cell) {
+        return .table(tableView, indexPath)
+      }
+    default:
+      break
+    }
+    if let superview {
+      return superview.selectionInfo()
+    }
+    return nil
+  }
 
   func superview<T: UIView>(of type: T.Type) -> T? {
     if let superview {

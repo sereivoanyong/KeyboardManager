@@ -29,16 +29,40 @@ final public class KeyboardManager: NSObject {
 
   public var viewControllerClassesToDisableToolbar: [UIViewController.Type] = []
 
+  public var isTapOutsideToResignEnabled: Bool = true {
+    didSet {
+      if let textInputView {
+        tapOutsideToResignGestureRecognizer.isEnabled = isTapOutsideToResignEnabled(for: textInputView)
+      }
+    }
+  }
+
+  /// Enabled classes to forcefully enable `isTapOutsideToResignEnabled` property.
+  /// If same class is added in `viewControllerClassesToDisableTapToResign`, then `viewControllerClassesToEnableTapToResign` will be ignored.
+  public var viewControllerClassesToEnableTapOutsideToResign: [UIViewController.Type] = []
+
+  /// Disabled classes to ignore `isTapOutsideToResignEnabled` property.
+  public var viewControllerClassesToDisableTapOutsideToResign: [UIViewController.Type] = [
+    UIAlertController.self,
+    UIInputViewController.self
+  ]
+
+  public var viewClassesToIgnoreTapOutsideToResign: [UIView.Type] = [
+    UIControl.self,
+    UINavigationBar.self
+  ]
+
   private weak var scrollView: UIScrollView?
 
   private var oldScrollViewContentInsetBottom: CGFloat?
 
   private var oldScrollViewScrollIndicatorInsetBottom: CGFloat?
 
-  lazy public private(set) var gestureRecognizerToResignFirstResponder: UITapGestureRecognizer = {
-    let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapToResignFirstResponder(_:)))
+  lazy public private(set) var tapOutsideToResignGestureRecognizer: UITapGestureRecognizer = {
+    let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapOutsideToResign(_:)))
     gestureRecognizer.cancelsTouchesInView = false
     gestureRecognizer.delegate = self
+    gestureRecognizer.isEnabled = false
     return gestureRecognizer
   }()
 
@@ -125,12 +149,13 @@ final public class KeyboardManager: NSObject {
 
       reloadToolbar(for: textInputView)
 
-      textInputView.window?.addGestureRecognizer(gestureRecognizerToResignFirstResponder)
+      tapOutsideToResignGestureRecognizer.isEnabled = isTapOutsideToResignEnabled(for: textInputView)
+      textInputView.window?.addGestureRecognizer(tapOutsideToResignGestureRecognizer)
     }
   }
 
   @objc private func textDidEndEditing(_ notification: Notification) {
-    textInputView?.window?.removeGestureRecognizer(gestureRecognizerToResignFirstResponder)
+    textInputView?.window?.removeGestureRecognizer(tapOutsideToResignGestureRecognizer)
     textInputView = nil
   }
 
@@ -294,18 +319,74 @@ final public class KeyboardManager: NSObject {
       }
     }
   }
-}
 
-extension KeyboardManager: UIGestureRecognizerDelegate {
+  private func isTapOutsideToResignEnabled(for textInputView: TextInputView) -> Bool {
+    var isEnabled = isTapOutsideToResignEnabled
+    if var textInputViewController = textInputView.owningViewController {
 
-  @objc private func handleTapToResignFirstResponder(_ gestureRecognizer: UITapGestureRecognizer) {
+      // If it is searchBar textField embedded in Navigation Bar
+      if let textField = textInputView as? UITextField, textField.isSearchBarTextField,
+         let navigationController = textInputViewController as? UINavigationController,
+         let topViewController = navigationController.topViewController {
+        textInputViewController = topViewController
+      }
+
+      // If viewController is kind of enable viewController class, then assuming resignOnTouchOutside is enabled.
+      if !isEnabled && viewControllerClassesToEnableTapOutsideToResign.contains(where: { textInputViewController.isKind(of: $0) }) {
+        isEnabled = true
+      }
+
+      if isEnabled {
+
+        // If viewController is kind of disable viewController class,
+        // then assuming resignOnTouchOutside is disable.
+        if viewControllerClassesToDisableTapOutsideToResign.contains(where: { textInputViewController.isKind(of: $0) }) {
+          isEnabled = false
+        }
+
+        // Special Controllers
+        if isEnabled {
+
+          let className = "\(type(of: textInputViewController))"
+
+          // _UIAlertControllerTextFieldViewController
+          if className.contains("UIAlertController") && className.hasSuffix("TextFieldViewController") {
+            isEnabled = false
+          }
+        }
+      }
+    }
+    return isEnabled
+  }
+
+  @objc private func tapOutsideToResign(_ gestureRecognizer: UITapGestureRecognizer) {
     if gestureRecognizer.state == .ended {
       textInputView?.resignFirstResponder()
     }
   }
+}
+
+extension KeyboardManager: UIGestureRecognizerDelegate {
 
   /** Note: returning YES is guaranteed to allow simultaneous recognition. returning NO is not guaranteed to prevent simultaneous recognition, as the other gesture's delegate may return YES. */
   public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
     return false
+  }
+
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    if let view = touch.view {
+      for viewClass in viewClassesToIgnoreTapOutsideToResign where view.isKind(of: viewClass) {
+        return false
+      }
+      if let selectionInfo = view.selectionInfo() {
+        switch selectionInfo {
+        case .collection(let collectionView, let indexPath):
+          return !(collectionView.delegate?.collectionView?(collectionView, shouldSelectItemAt: indexPath) ?? true)
+        case .table(let tableView, let indexPath):
+          return !(tableView.delegate?.tableView?(tableView, willSelectRowAt: indexPath) != nil)
+        }
+      }
+    }
+    return true
   }
 }

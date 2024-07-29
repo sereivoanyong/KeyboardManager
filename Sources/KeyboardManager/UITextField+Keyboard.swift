@@ -29,7 +29,7 @@ extension UITextField {
   }
 
   /// Returns searchBar if receiver object is UISearchBarTextField, otherwise return nil.
-  func findSearchBar() -> UISearchBar? {
+  private func findSearchBar() -> UISearchBar? {
     var responder = next
     while let currentResponder = responder {
       if let searchBar = currentResponder as? UISearchBar {
