@@ -8,6 +8,7 @@ import UIKit
 
 public struct KeyboardUserInfo {
 
+  weak public var screen: UIScreen?
   public let frameBegin: CGRect
   public let frameEnd: CGRect
   public let animationDuration: TimeInterval
@@ -25,6 +26,7 @@ public struct KeyboardUserInfo {
     else {
       return nil
     }
+    self.screen = notification.object as? UIScreen
     self.frameBegin = frameBegin
     self.frameEnd = frameEnd
     self.animationDuration = animationDuration

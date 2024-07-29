@@ -12,12 +12,12 @@ private var isBeingAdjustedForKeyboardKey: Void?
 extension UIScrollView {
 
   /// If YES, then scrollview will ignore scrolling (simply not scroll it) for adjusting textfield position. Default is NO.
-  final public var shouldIgnoreAdjustmentsForKeyboard: Bool {
+  public var shouldIgnoreAdjustmentsForKeyboard: Bool {
     get { return objc_getAssociatedValue(self, &shouldIgnoreAdjustmentsForKeyboardKey) ?? false }
     set { objc_setAssociatedValue(self, &shouldIgnoreAdjustmentsForKeyboardKey, newValue) }
   }
 
-  final public var isBeingAdjustedForKeyboard: Bool {
+  public var isBeingAdjustedForKeyboard: Bool {
     get { return objc_getAssociatedValue(self, &isBeingAdjustedForKeyboardKey) ?? false }
     set { objc_setAssociatedValue(self, &isBeingAdjustedForKeyboardKey, newValue) }
   }

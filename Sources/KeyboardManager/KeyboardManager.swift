@@ -15,7 +15,7 @@ final public class KeyboardManager: NSObject {
 
   public var overrideKeyboardAppearance: UIKeyboardAppearance?
 
-  public private(set) var isKeyboardShown: Bool = false
+  public private(set) var isKeyboardHidden: Bool = true
 
   public private(set) var keyboardUserInfo: KeyboardUserInfo?
 
@@ -67,7 +67,7 @@ final public class KeyboardManager: NSObject {
   // MARK: Keyboard Notifications
 
   @objc private func keyboardWillShow(_ notification: Notification) {
-    isKeyboardShown = true
+    isKeyboardHidden = false
 
     let oldKeyboardUserInfo = keyboardUserInfo
     keyboardUserInfo = KeyboardUserInfo(notification: notification)
@@ -81,7 +81,7 @@ final public class KeyboardManager: NSObject {
   }
 
   @objc private func keyboardWillHide(_ notification: Notification) {
-    isKeyboardShown = false
+    isKeyboardHidden = true
 
     keyboardUserInfo = KeyboardUserInfo(notification: notification)
 
@@ -91,7 +91,7 @@ final public class KeyboardManager: NSObject {
           scrollView.contentInset.bottom = oldScrollViewContentInsetBottom
         }
         if let oldScrollViewScrollIndicatorInsetBottom {
-          scrollView.scrollIndicatorInsets.bottom = oldScrollViewScrollIndicatorInsetBottom
+          scrollView.verticalScrollIndicatorInsets.bottom = oldScrollViewScrollIndicatorInsetBottom
         }
       }
       if let keyboardUserInfo {
@@ -227,7 +227,7 @@ final public class KeyboardManager: NSObject {
       UIDevice.current.playInputClick()
     }
 
-    guard let textInputView = textInputView, let viewController = textInputView.owningViewController else {
+    guard let textInputView, let viewController = textInputView.owningViewController else {
       return
     }
     let siblings = viewController.view.findTextInputViewsRecursively()
@@ -248,7 +248,7 @@ final public class KeyboardManager: NSObject {
       UIDevice.current.playInputClick()
     }
 
-    guard let textInputView = textInputView, let viewController = textInputView.owningViewController else {
+    guard let textInputView, let viewController = textInputView.owningViewController else {
       return
     }
     let siblings = viewController.view.findTextInputViewsRecursively()
@@ -267,14 +267,7 @@ final public class KeyboardManager: NSObject {
   // MARK: Layout
 
   func layout() {
-    guard
-      let keyboardUserInfo = keyboardUserInfo,
-      let textInputView = textInputView,
-      let scrollView = textInputView.scrollViewForAdjustments(),
-      let window = textInputView.window
-    else {
-      return
-    }
+    guard let keyboardUserInfo, let textInputView, let scrollView = textInputView.scrollViewForAdjustments(), let window = textInputView.window else { return }
 
     self.scrollView = scrollView
     scrollView.isBeingAdjustedForKeyboard = true
@@ -289,10 +282,10 @@ final public class KeyboardManager: NSObject {
       }
     }
     let bottomScrollIndicatorAdjustment = windowKeyboardFrame.height - scrollView.safeAreaInsets.bottom
-    if bottomScrollIndicatorAdjustment > scrollView.scrollIndicatorInsets.bottom {
-      oldScrollViewScrollIndicatorInsetBottom = scrollView.scrollIndicatorInsets.bottom
+    if bottomScrollIndicatorAdjustment > scrollView.verticalScrollIndicatorInsets.bottom {
+      oldScrollViewScrollIndicatorInsetBottom = scrollView.verticalScrollIndicatorInsets.bottom
       adjustmentHandlers.append {
-        scrollView.scrollIndicatorInsets.bottom = bottomScrollIndicatorAdjustment
+        scrollView.verticalScrollIndicatorInsets.bottom = bottomScrollIndicatorAdjustment
       }
     }
     keyboardUserInfo.animate {
